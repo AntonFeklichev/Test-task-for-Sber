@@ -29,7 +29,7 @@ public class FactorialControllerTest {
         // Arrange
         FactorialRequestDto requestDto = new FactorialRequestDto(5);
         FactorialResponseDto responseDto = new FactorialResponseDto(BigInteger.valueOf(120));
-        Mockito.when(factorialService.getFactorial(requestDto)).thenReturn(responseDto);
+        Mockito.when(factorialService.calculateFactorial(requestDto)).thenReturn(responseDto);
 
 
         // Act

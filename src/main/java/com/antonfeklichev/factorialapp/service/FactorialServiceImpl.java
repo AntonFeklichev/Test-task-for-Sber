@@ -2,29 +2,43 @@ package com.antonfeklichev.factorialapp.service;
 
 import com.antonfeklichev.factorialapp.dto.FactorialRequestDto;
 import com.antonfeklichev.factorialapp.dto.FactorialResponseDto;
+import com.antonfeklichev.factorialapp.entity.Factorial;
+import com.antonfeklichev.factorialapp.exception.NegativeNumberException;
+import com.antonfeklichev.factorialapp.repository.FactorialRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
 @Service
 public class FactorialServiceImpl implements FactorialService {
 
-    Map<Integer, BigInteger> cache = new ConcurrentHashMap<>();
+    private final FactorialRepository factorialRepository;
+
+    public FactorialServiceImpl(FactorialRepository factorialRepository) {
+        this.factorialRepository = factorialRepository;
+    }
 
 
     @Override
-    public FactorialResponseDto getFactorial(FactorialRequestDto requestDto) {
+    public FactorialResponseDto calculateFactorial(FactorialRequestDto requestDto) {
 
         Integer factorialNum = requestDto.factorialNum();
+        if (factorialNum < 0) {
+            throw new NegativeNumberException("Can not calculate factorial for negative numbers");
+        }
+            Optional<Factorial> factorialEntity = factorialRepository.findById(factorialNum);
 
-        BigInteger factorial = cache.computeIfAbsent(factorialNum, this::calculateFactorial);
+        if (factorialEntity.isEmpty()) {
+            BigInteger factorial = getFactorial(factorialNum);
+            factorialRepository.save(new Factorial(factorialNum, factorial));
+            return new FactorialResponseDto(factorial);
 
-        return new FactorialResponseDto(factorial);
+        }
+        return new FactorialResponseDto(factorialEntity.get().getFactorial());
     }
 
-    private BigInteger calculateFactorial(Integer n) {
+    private BigInteger getFactorial(Integer n) {
 
         BigInteger factorial = BigInteger.ONE;
 

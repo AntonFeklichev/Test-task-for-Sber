@@ -26,7 +26,7 @@ public class FactorialController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(factorialService.getFactorial(requestDto));
+                .body(factorialService.calculateFactorial(requestDto));
     }
 
 

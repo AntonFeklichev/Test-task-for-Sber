@@ -5,5 +5,5 @@ import com.antonfeklichev.factorialapp.dto.FactorialResponseDto;
 
 public interface FactorialService {
 
-    FactorialResponseDto getFactorial(FactorialRequestDto requestDto);
+    FactorialResponseDto calculateFactorial(FactorialRequestDto requestDto);
 }
