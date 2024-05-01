@@ -2,6 +2,7 @@ package com.antonfeklichev.factorialapp.controller;
 
 import com.antonfeklichev.factorialapp.dto.FactorialRequestDto;
 import com.antonfeklichev.factorialapp.dto.FactorialResponseDto;
+import com.antonfeklichev.factorialapp.exception.NegativeNumberException;
 import com.antonfeklichev.factorialapp.service.FactorialService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,12 +26,12 @@ public class FactorialControllerTest {
     FactorialController factorialController;
 
     @Test
-    void calculateFactorial_ReturnsFactorialResponseDto() {
+    void testCalculateFactorialForPositiveNumber() {
+
         // Arrange
         FactorialRequestDto requestDto = new FactorialRequestDto(5);
         FactorialResponseDto responseDto = new FactorialResponseDto(BigInteger.valueOf(120));
         Mockito.when(factorialService.calculateFactorial(requestDto)).thenReturn(responseDto);
-
 
         // Act
         ResponseEntity<FactorialResponseDto> responseEntity = factorialController.calculateFactorial(requestDto);
@@ -41,6 +42,19 @@ public class FactorialControllerTest {
         Assertions.assertEquals(MediaType.APPLICATION_JSON, responseEntity.getHeaders().getContentType());
         Assertions.assertEquals(responseDto, responseEntity.getBody());
 
+    }
+
+    @Test
+    void testCalculateFactorialForNegativeNumber() {
+
+        //Arrange
+        FactorialRequestDto requestDto = new FactorialRequestDto(-5);
+        Mockito.when(factorialService.calculateFactorial(requestDto))
+                .thenThrow(NegativeNumberException.class);
+
+        //Act & Assert
+        Assertions.assertThrows(NegativeNumberException.class,
+                () -> factorialController.calculateFactorial(requestDto));
     }
 
 }

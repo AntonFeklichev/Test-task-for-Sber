@@ -5,12 +5,13 @@ import com.antonfeklichev.factorialapp.dto.FactorialResponseDto;
 import com.antonfeklichev.factorialapp.entity.Factorial;
 import com.antonfeklichev.factorialapp.exception.NegativeNumberException;
 import com.antonfeklichev.factorialapp.repository.FactorialRepository;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.Optional;
 
 @Service
+@Getter
 public class FactorialServiceImpl implements FactorialService {
 
     private final FactorialRepository factorialRepository;
@@ -23,19 +24,18 @@ public class FactorialServiceImpl implements FactorialService {
     @Override
     public FactorialResponseDto calculateFactorial(FactorialRequestDto requestDto) {
 
-        Integer factorialNum = requestDto.factorialNum();
-        if (factorialNum < 0) {
+        Integer numberForFactorialCalc = requestDto.factorialNum();
+        if (numberForFactorialCalc < 0) {
             throw new NegativeNumberException("Can not calculate factorial for negative numbers");
         }
-            Optional<Factorial> factorialEntity = factorialRepository.findById(factorialNum);
 
-        if (factorialEntity.isEmpty()) {
-            BigInteger factorial = getFactorial(factorialNum);
-            factorialRepository.save(new Factorial(factorialNum, factorial));
-            return new FactorialResponseDto(factorial);
-
-        }
-        return new FactorialResponseDto(factorialEntity.get().getFactorial());
+        return factorialRepository.findById(numberForFactorialCalc)
+                .map(factorial -> new FactorialResponseDto(factorial.getFactorial()))
+                .orElseGet(() -> {
+                    BigInteger factorial = getFactorial(numberForFactorialCalc);
+                    factorialRepository.save(new Factorial(numberForFactorialCalc, factorial));
+                    return new FactorialResponseDto(factorial);
+                });
     }
 
     private BigInteger getFactorial(Integer n) {
