@@ -5,6 +5,7 @@ import com.antonfeklichev.factorialapp.dto.FactorialResponseDto;
 import com.antonfeklichev.factorialapp.entity.Factorial;
 import com.antonfeklichev.factorialapp.exception.NegativeNumberException;
 import com.antonfeklichev.factorialapp.repository.FactorialRepository;
+import io.micrometer.core.annotation.Timed;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class FactorialServiceImpl implements FactorialService {
 
 
     @Override
+    @Timed(value = "factorial.timer")
     public FactorialResponseDto calculateFactorial(FactorialRequestDto requestDto) {
 
         Integer numberForFactorialCalc = requestDto.factorialNum();
