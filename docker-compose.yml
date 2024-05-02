@@ -15,7 +15,23 @@ services:
   factorial-db:
     image: postgres:14-alpine
     expose:
-       - 5432
+      - 5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      monitoring:
+        aliases:
+          - prometheus
+networks:
+  monitoring:

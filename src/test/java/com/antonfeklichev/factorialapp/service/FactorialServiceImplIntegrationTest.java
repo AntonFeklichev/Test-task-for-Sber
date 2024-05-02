@@ -11,6 +11,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -18,10 +20,10 @@ import java.util.Optional;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 
 @SpringBootTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
 public class FactorialServiceImplIntegrationTest {
 
-    @Autowired
+    @SpyBean
     FactorialRepository factorialRepository;
     @Autowired
     FactorialServiceImpl factorialService;
@@ -43,6 +45,26 @@ public class FactorialServiceImplIntegrationTest {
         Assertions.assertEquals(new BigInteger("120"), factorialRepository.findById(5).get().getFactorial());
     }
 
+
+    @Test
+    public void testFactorialCalculationReturnSavedFactorial() {
+        // Arrange
+        Integer factorialNumber = 6;
+        BigInteger savedFactorialValue = BigInteger.valueOf(720);
+        Factorial savedFactorial = new Factorial(factorialNumber, savedFactorialValue);
+
+        // Customizing mock behavior
+        Mockito.when(factorialRepository.findById(factorialNumber)).thenReturn(Optional.of(savedFactorial));
+
+        // Act
+        FactorialRequestDto requestDto = new FactorialRequestDto(factorialNumber);
+        FactorialResponseDto response = factorialService.calculateFactorial(requestDto);
+
+        // Assert
+        Assertions.assertEquals(savedFactorialValue, response.result(), "Factorial must be returned from DB");
+        Mockito.verify(factorialRepository, Mockito.never()).save(Mockito.any(Factorial.class));
+
+    }
 
     @Test
     void testFactorialCalculationForNegativeNumber() {
